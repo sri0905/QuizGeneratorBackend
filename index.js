@@ -5,6 +5,8 @@ const Question = require("./models/Question");
 const app = express()
 const port = 4000
 const cors = require('cors');
+const Results = require("./models/Result");
+
 
 app.use(cors())
 app.use(express.json())
@@ -40,13 +42,43 @@ app.post('/fetchAllQuestions', async(req, res)=>{
 app.post('/fetchAllTheTopics', async(req, res)=>{
     try {
        const topics  = await Question.distinct('topic')
-        console.log(topics)
         res.status(200).json({topics})
     } catch (error) {
         console.log("error while fecthing toics: ", error)
         res.status(500).send("Internal Server Error")
     }
 })
+
+//api to fetch all questions in certain topic
+app.post('/fetchQuestionsInATopic', async(req, res)=>{
+    try {
+        const {selectedTopic} = req.body
+        console.log(selectedTopic)
+        const questions = await Question.find({topic:selectedTopic})
+        console.log(questions)
+        res.status(200).json({questions})
+        
+    } catch (error) {
+        console.log("error while sending questions to the server", error)
+        res.status(500).send("Internal Server Error")
+    }
+})
+//api to submit formData
+app.post('/submitQuiz', async (req, res) => {
+    try {
+        const { selectedOptions, topic } = req.body;
+        const result = await Results.create({
+            selectedOptions: selectedOptions,
+            topic: topic
+        });
+        await result.save();
+        res.status(200).json({ result });
+    } catch (error) {
+
+        console.error("Error submitting quiz:", error);
+        res.status(500).json({ error: "An error occurred while submitting the quiz." });
+    }
+});
 
 app.listen(port, ()=>{
     try {

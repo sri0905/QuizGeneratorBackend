@@ -29,6 +29,10 @@ const QuestionSchema = new Schema({
     correctOption: {
         type: String,
         required: true
+    },
+    created: {
+        type: Date,
+        default: Date.now  // Default value is set to the current date and time
     }
 });
 
